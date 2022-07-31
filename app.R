@@ -1,48 +1,80 @@
-## data from: https://www.jaredlander.com/data/PizzaPollData.php
-
-## global ------------------
 library(shiny)
 library(shinydashboard)
-library(plotly)
-source("getdata.R")
-## global ------------------
+library(shinydashboardPlus)
+library(tidyverse)
+library(jsonlite)
+library(lubridate)
+library(ggrepel)
 
-## app.R ----------
-ui <- dashboardPage(
-  dashboardHeader(title = "Pizza Polls"),
-  dashboardSidebar(
-    sidebarMenu(
-      menuItem("Charts", tabName = "Charts", icon = icon("dashboard")),
-      menuItem("About",  tabName = "About",  icon = icon("th"))
-    )
+source("getdata.R")
+
+
+ui = dashboardPage(
+  
+  header = dashboardHeader(
+    disable = TRUE
   ),
-  dashboardBody(
-    
-    fluidRow(
-      title = "Best Pizzas",
-      selectizeInput("select_order_count", "Did NYhackr order from this place more than once?", 
-                     choices  = unique(pizza_frame_small$`Order Count`),
-                     selected = unique(pizza_frame_small$`Order Count`),
-                     multiple = TRUE),
-      sliderInput("Min_Vote_Filter", "Minimum Number of Total Votes", 
+  sidebar = dashboardSidebar(
+    disable = TRUE
+  ),
+  title = "PizzaFrame",
+  
+  body = dashboardBody(
+    tags$head(tags$link(rel = "shortcut icon",
+                        href = "images/favicon.ico")),
+    box(
+      title = "1. Introduction",
+      closable = FALSE,
+      width = 12,
+      status = "primary",
+      solidHeader = FALSE,
+      collapsible = TRUE,
+      HTML("I have attended New York Open Statistical Programming <a href='https://nyhackr.org/'>meetups</a>
+            for a few years. I love <a href = 'https://www.jaredlander.com'>Jared Lander's</a>
+            enthusiasm for pizza. Jared, the organizer, has been polling the attendees for many years.
+            This Shiny Web App analyzes some of the trends in the Pizza Poll data.
+               <br/>
+               <br/>
+             App developed by <a href='https://arhamchoudhury.com/'>Arham Choudhury</a>")
+    ), # closes box 1
+    box(
+      title = "2. Interactive Chart",
+      closable = FALSE,
+      width = 12,
+      status = "primary",
+      solidHeader = FALSE,
+      collapsible = TRUE,
+      checkboxGroupInput(inputId = "select_order_count",
+                         label = "Did NYhackr order from this place more than once?",
+                         choices  = unique(pizza_frame_small$`Order Count`),
+                         selected = unique(pizza_frame_small$`Order Count`)),
+      sliderInput("Min_Vote_Filter", "Minimum Number of Total Votes",
                   min=min(pizza_frame_small$TotalVotes_by_Place),
                   max=max(pizza_frame_small$TotalVotes_by_Place),
                   value=c(min(pizza_frame_small$TotalVotes_by_Place))),
-      plotOutput("pizza_plot_1", height=600),
-      width = 12
-    )
-  )
-)
+      plotOutput("pizza_plot_1")
+      
+    ) # closes box
+  ) # closes dashboardBody
+) # dashboardPage ui
 
-server <- function(input, output) {
+server = function(input, output) {
+  pizza_frame_subset <- reactive({
+    validate(
+      need(input$Cylinder != "", 'Please choose at least one filter')
+    )
+    pizza_frame_small %>%
+      filter(`Order Count` %in% input$select_order_count) %>%
+      filter(TotalVotes_by_Place > input$Min_Vote_Filter)
+  })
+  
+  
   
   output$pizza_plot_1 <- renderPlot({
-    pizza_plot_1 <- pizza_frame_small %>% 
-      ungroup() %>% 
-      slice(1:50) %>% 
-      filter(`Order Count` %in% input$select_order_count) %>% 
-      filter(TotalVotes_by_Place > input$Min_Vote_Filter) %>% 
-      ggplot(aes(x=reorder(Place, Pizza_Poll_Score), 
+    pizza_plot_1 <- pizza_frame_subset() %>%
+      ungroup() %>%
+      slice(1:25) %>%
+      ggplot(aes(x=reorder(Place, Pizza_Poll_Score),
                  y=Pizza_Poll_Score,
                  fill=`Order Count`,
                  label = Pizza_Poll_Score)) +
@@ -60,4 +92,7 @@ server <- function(input, output) {
   })
 }
 
-shinyApp(ui=ui, server=server)
+
+
+shinyApp(ui = ui, server = server)
+
