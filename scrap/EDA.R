@@ -2,10 +2,43 @@
 check_data_0 <- pizza_0 %>% 
   filter(TotalVotes == 0)
 check_data_0
-# A: Only Bravo Pizza has zero votes
+#### ---- A: Only Bravo Pizza has zero votes
+
+# Q: are there any pizza places with zero votes?
+check_data_0a <- pizza_0 %>% 
+  filter(TotalVotes == 1)
+check_data_0a
+#### ---- A: Only Patzeria has 1 vote
+
+# Q: which pizza places had more than 40 votes?
+check_data_0b <- pizza_0 %>% 
+  filter(TotalVotes > 40) %>% 
+  pull(Place) %>% 
+  unique()
+check_data_0b
+#### ---- A: Only Patzeria has 1 vote
 
 # histogram of votes
 hist(pizza_0$TotalVotes)
+
+hist(pizza_frame_small$TotalVotes_by_Place,
+     breaks = seq(from=1, to=150, by=2))
+
+
+histogram <- pizza_frame_small %>%
+  ungroup() %>% 
+  add_count(TotalVotes_by_Place) %>% 
+  mutate(percentage = n/sum(n)) %>% 
+  ggplot(aes(x=TotalVotes_by_Place)) +
+  geom_col(aes(y=percentage))
+histogram
+
+  
+h = hist(pizza_frame_small$TotalVotes_by_Place, plot=FALSE,
+         breaks = seq(from=1, to=150, by=2)) 
+h$density = h$counts/sum(h$counts)*100
+plot(h,freq=FALSE)
+
 
 # summary stats of votes
 summary(pizza_0$TotalVotes)
@@ -15,6 +48,7 @@ check_data_1 <- pizza_0 %>%
   filter(TotalVotes == 67)
 check_data_1
 
+# Unique answers
 unique(pizza_0$Answer)
 
 
@@ -106,8 +140,6 @@ write.csv(Pizza_Score_by_Place, "Pizza_Score_by_Place.csv")
 
 
 #Preview of pizza_plot_1
-
-
 pizza_plot_1 <- ggplot(Pizza_Score_by_Place, 
                        aes(x=reorder(Place, Pizza_Poll_Score), y=Pizza_Poll_Score,
                            fill=Order_Type)) +
@@ -117,6 +149,24 @@ pizza_plot_1 <- ggplot(Pizza_Score_by_Place,
   labs(title="Best Pizzas at nyhackr Meetups")
 pizza_plot_1 
 
+
+single_vote_places <- pizza_frame_small %>% 
+  filter(TotalVotes_by_Place == 1)
+single_vote_places
+
+number_multiple_order <- pizza_frame_small %>% 
+  filter(Count_Orders > 1) %>% 
+  pull(Place) %>% 
+  length()
+number_multiple_order
+
+number_unique_places <- pizza_frame_small %>% 
+  pull(Place) %>% 
+  length()
+number_unique_places
+
+
+summary(pizza_frame_small$TotalVotes_by_Place)
 
 
 # end

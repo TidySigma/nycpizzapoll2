@@ -52,9 +52,16 @@ ui = dashboardPage(
                   min=min(pizza_frame_small$TotalVotes_by_Place),
                   max=max(pizza_frame_small$TotalVotes_by_Place),
                   value=c(min(pizza_frame_small$TotalVotes_by_Place))),
-      plotOutput("pizza_plot_1")
+      plotOutput("pizza_plot_1"),
+      HTML("<b>Notes:</b> <br/>
+           Interactive chart shows top 25 pizza places. There are 61 unique pizza places in the data.<br/>
+           There are 15 places that have received multiple orders from NYhackr.
+           Filter by <b>Order Count</b> to separate these two groups. 
+           <br/>
+           The median number of votes is 16. Due to large group events, 2 places have more than 40 votes. 
+           Use to <b>slider</b> to filter by <b>vote count</b>.")
       
-    ) # closes box
+    ) # closes box 2
   ) # closes dashboardBody
 ) # dashboardPage ui
 
@@ -67,9 +74,7 @@ server = function(input, output) {
       filter(`Order Count` %in% input$select_order_count) %>%
       filter(TotalVotes_by_Place > input$Min_Vote_Filter)
   })
-  
-  
-  
+
   output$pizza_plot_1 <- renderPlot({
     pizza_plot_1 <- pizza_frame_subset() %>%
       ungroup() %>%
@@ -95,4 +100,3 @@ server = function(input, output) {
 
 
 shinyApp(ui = ui, server = server)
-

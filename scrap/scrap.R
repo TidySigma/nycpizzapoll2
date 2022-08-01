@@ -1,21 +1,20 @@
-#filter(TotalVotes_by_Place > input$Min_Vote_Filter) %>%
+df <- tribble(
+  ~name,    ~gender,   ~runs,
+  "Max",    "male",       10,
+  "Sandra", "female",      1,
+  "Susan",  "female",      4
+)
+df
+# counts rows:
+df %>% count(gender)
+# counts runs:
+df %>% count(gender, wt = runs)
 
-Pizza_Score_Multiple_Orders <- pizza %>% 
-  group_by(Place, pollq_id) %>% 
-  mutate(TotalVotes_by_Place = sum(TotalVotes)/5) %>% 
-  mutate(Pizza_Poll_Score = sum(Answer_Numeric_Weighted)/TotalVotes_by_Place) %>% 
-  select(Place, pollq_id, Count_Place, TotalVotes_by_Place,
-         Pizza_Poll_Score) %>%
-  ungroup() %>% 
-  unique() %>% 
-  arrange(desc(Pizza_Poll_Score)) %>% 
-  na.omit()
-head(Pizza_Score_Multiple_Orders)
+# tally() is a lower-level function that assumes you've done the grouping
+starwars %>% tally()
+starwars %>% group_by(species) %>% tally()
 
-
-
-ggsave(plot = pizza_plot_top10, height = 2, width = 5,
-       units = "in", filename = "pizzapoll.jpg", dpi=400)
-
-
-# end
+# both count() and tally() have add_ variants that work like
+# mutate() instead of summarise
+df %>% add_count(gender, wt = runs)
+df %>% add_count(gender)

@@ -44,3 +44,9 @@ pizza_frame_small <- pizza_frame %>%
   na.omit()
 head(pizza_frame_small)
 
+
+
+
+
+
+
