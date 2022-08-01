@@ -50,7 +50,7 @@ ui = dashboardPage(
                          selected = unique(pizza_frame_small$`Order Count`)),
       sliderInput("Min_Vote_Filter", "Minimum Number of Total Votes",
                   min=min(pizza_frame_small$TotalVotes_by_Place),
-                  max=max(pizza_frame_small$TotalVotes_by_Place),
+                  max=40,
                   value=c(min(pizza_frame_small$TotalVotes_by_Place))),
       plotOutput("pizza_plot_1"),
       HTML("<b>Notes:</b> <br/>
